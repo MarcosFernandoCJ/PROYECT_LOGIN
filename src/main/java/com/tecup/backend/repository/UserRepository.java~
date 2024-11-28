@@ -1,4 +1,0 @@
-package com.tecup.backend.repository;
-
-public interface UserRepository {
-}

@@ -1,4 +1,4 @@
-package com.tecup.backend.repository;
+package com.tecup.backend.payload.repository;
 
 import com.tecup.backend.models.ERole;
 import com.tecup.backend.models.Role;

@@ -7,8 +7,8 @@ import com.tecup.backend.payload.request.LoginRequest;
 import com.tecup.backend.payload.request.SignupRequest;
 import com.tecup.backend.payload.response.MessageResponse;
 import com.tecup.backend.payload.response.UserInfoResponse;
-import com.tecup.backend.repository.RoleRepository;
-import com.tecup.backend.repository.UserRepository;
+import com.tecup.backend.payload.repository.RoleRepository;
+import com.tecup.backend.payload.repository.UserRepository;
 import com.tecup.backend.security.jwt.JwtUtils;
 import com.tecup.backend.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//for Angular Client (withCredentials)
-//@CrossOrigin(origins = "http://localhost:8081", maxAge = 3600, allowCredentials="true")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
@@ -53,7 +51,7 @@ public class AuthController {
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
     Authentication authentication = authenticationManager
-            .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+            .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -97,27 +95,18 @@ public class AuthController {
     } else {
       strRoles.forEach(role -> {
         switch (role) {
-
           case "admin":
             Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(adminRole);
 
             break;
-
-          case "organizador":
-            Role orgRole = roleRepository.findByName(ERole.ROLE_ORGANIZADOR)
+          case "mod":
+            Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(orgRole);
+            roles.add(modRole);
 
             break;
-          case "jurado":
-            Role jurRole = roleRepository.findByName(ERole.ROLE_JURADO)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(jurRole);
-
-            break;
-
           default:
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
