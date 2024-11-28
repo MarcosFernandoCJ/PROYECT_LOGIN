@@ -1,8 +1,10 @@
 package com.tecup.backend.controllers;
 
+import com.tecup.backend.models.Career;
 import com.tecup.backend.models.ERole;
 import com.tecup.backend.models.Role;
 import com.tecup.backend.models.User;
+import com.tecup.backend.payload.repository.CareerRepository;
 import com.tecup.backend.payload.request.LoginRequest;
 import com.tecup.backend.payload.request.SignupRequest;
 import com.tecup.backend.payload.response.MessageResponse;
@@ -40,6 +42,9 @@ public class AuthController {
 
   @Autowired
   RoleRepository roleRepository;
+
+  @Autowired
+  CareerRepository careerRepository;
 
   @Autowired
   PasswordEncoder encoder;
@@ -101,10 +106,16 @@ public class AuthController {
             roles.add(adminRole);
 
             break;
-          case "mod":
-            Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+          case "organizador":
+            Role organizadorRole = roleRepository.findByName(ERole.ROLE_ORGANIZADOR)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(modRole);
+            roles.add(organizadorRole);
+
+            break;
+          case "jurado":
+            Role juraRole = roleRepository.findByName(ERole.ROLE_JURADO)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(juraRole);
 
             break;
           default:
@@ -116,6 +127,13 @@ public class AuthController {
     }
 
     user.setRoles(roles);
+
+    // Asociar la carrera si se proporciona careerId
+    if (signUpRequest.getCareerId() != null) {
+      Career career = careerRepository.findById(signUpRequest.getCareerId())
+              .orElseThrow(() -> new RuntimeException("Error: Career is not found."));
+      user.setCareer(career);
+    }
     userRepository.save(user);
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));

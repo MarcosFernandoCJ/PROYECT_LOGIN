@@ -56,12 +56,4 @@ public class SignupRequest {
     public void setRole(Set<String> role) {
         this.role = role;
     }
-
-    public Long getCareerId() {
-        return careerId;
-    }
-
-    public void setCareerId(Long careerId) {
-        this.careerId = careerId;
-    }
 }

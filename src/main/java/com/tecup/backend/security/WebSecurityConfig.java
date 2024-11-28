@@ -65,6 +65,9 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth ->
                     auth.requestMatchers("/api/auth/**").permitAll()
                             .requestMatchers("/api/test/**").permitAll()
+                            .requestMatchers("/api/career/**").permitAll()
+                            .requestMatchers("/api/department/**").permitAll()
+                            .requestMatchers("/api/events/**").permitAll()
                             .anyRequest().not().authenticated()
             );
     http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));

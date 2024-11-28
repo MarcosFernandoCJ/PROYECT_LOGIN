@@ -37,6 +37,10 @@ public class User {
     @Size(max = 120)
     private String password;
 
+    @ManyToOne
+    @JoinColumn(name = "career_id", nullable = true)
+    private Career career;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

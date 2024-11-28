@@ -1,4 +1,10 @@
 package com.tecup.backend.payload.repository;
 
-public interface CareerRepository {
+import com.tecup.backend.models.Career;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CareerRepository extends JpaRepository<Career, Long> {
+
 }

@@ -23,18 +23,6 @@ public class Event {
 
 
     @ManyToOne
-    @JoinColumn(name = "organizador_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    public Event() {}
-
-    public Event(Long id, String name, String description, String place, Date fecha_inicio, Date fecha_fin, User user) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.place = place;
-        this.fecha_inicio = fecha_inicio;
-        this.fecha_fin = fecha_fin;
-        this.user = user;
-    }
 }

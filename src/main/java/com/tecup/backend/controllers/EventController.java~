@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,19 +36,22 @@ public class EventController {
 
     // Crear un nuevo evento
     @PostMapping("/add")
-    @PreAuthorize("hasRole('ORGANIZADOR')") // Solo los organizadores pueden crear eventos
+    @PreAuthorize("hasRole('ORGANIZADOR')")
     public ResponseEntity<?> addEvent(@RequestBody Event event) {
         logger.info("Intentando agregar un nuevo evento: {}", event.getName());
 
-        // Obtener el usuario autenticado desde el contexto de seguridad
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<User> user = userRepository.findByUsername(username);
-
-        if (user.isEmpty()) {
-            return ResponseEntity.badRequest().body("Error: Usuario autenticado no encontrado.");
+        // Validación de organizador
+        if (event.getUser() == null || event.getUser().getId() == null) {
+            return ResponseEntity.badRequest().body("Error: El organizador del evento es obligatorio.");
         }
 
-        // Asociar el usuario autenticado como organizador del evento
+        // Validar que el organizador exista
+        Optional<User> user = userRepository.findById(event.getUser().getId());
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: El organizador especificado no existe.");
+        }
+
+        // Asociar el organizador
         event.setUser(user.get());
 
         // Validar fechas
@@ -65,5 +67,4 @@ public class EventController {
         Event savedEvent = eventRepository.save(event);
         return ResponseEntity.ok(savedEvent);
     }
-
 }
