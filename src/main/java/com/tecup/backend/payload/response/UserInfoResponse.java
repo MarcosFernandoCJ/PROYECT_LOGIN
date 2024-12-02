@@ -6,12 +6,19 @@ public class UserInfoResponse {
 	private Long id;
 	private String username;
 	private String email;
-	private List<String> roles;
+	private String career;
+	private String departmentCareer;
+	List<String> inscriptions;
+	List<String> roles;
 
-	public UserInfoResponse(Long id, String username, String email, List<String> roles) {
+
+	public UserInfoResponse(Long id, String username, String email,String career, String departmentCareer,List<String> inscriptions,List<String> roles) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
+		this.career = career;
+		this.departmentCareer = departmentCareer;
+		this.inscriptions = inscriptions;
 		this.roles = roles;
 	}
 
@@ -42,4 +49,12 @@ public class UserInfoResponse {
 	public List<String> getRoles() {
 		return roles;
 	}
+
+	public String getCareer() {return career;}
+
+	public void setCareer(String career) {this.career = career;}
+
+	public String getDepartmentCareer() {return departmentCareer;}
+
+	public void setDepartmentCareer(String departmentCareer) {this.departmentCareer = departmentCareer;}
 }

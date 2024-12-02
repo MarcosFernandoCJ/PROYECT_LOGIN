@@ -18,15 +18,15 @@ public class Career {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "department_id", nullable = false)
-    private Department department;
+    @JoinColumn(name = "department_id")
+    private Department department_id;
 
     public Career() {
     }
 
-    public Career(Long id, String name, Department department) {
+    public Career(Long id, String name, Department department_id) {
         this.id = id;
         this.name = name;
-        this.department = department;
+        this.department_id = department_id;
     }
 }

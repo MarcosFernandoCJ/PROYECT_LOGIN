@@ -82,7 +82,7 @@ public class AuthController {
 
     // Obtener las inscripciones (nombres de eventos)
     List<String> inscriptions = user.getInscriptions().stream()
-            .map(inscription -> inscription.getEvent().getName()) // Obtener el nombre del evento
+            .map(inscription -> inscription.getEvent_id().getName()) // Obtener el nombre del evento
             .collect(Collectors.toList());
 
       return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())

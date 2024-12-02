@@ -1,0 +1,37 @@
+package com.tecup.backend.models;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Getter
+@Setter
+@Table(name = "group_participants")
+public class GroupParticipant {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id", nullable = false)
+    private GroupEvent group;
+
+    @ManyToOne
+    @JoinColumn(name = "inscription_id", nullable = false)
+    private Inscription inscription;
+
+    @OneToMany(mappedBy = "groupEvent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<GroupParticipant> participants = new HashSet<>();
+    
+    public GroupParticipant() {}
+
+    public GroupParticipant(GroupEvent group, Inscription inscription) {
+        this.group = group;
+        this.inscription = inscription;
+    }
+}
