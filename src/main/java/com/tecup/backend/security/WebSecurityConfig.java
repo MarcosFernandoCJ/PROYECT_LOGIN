@@ -70,6 +70,8 @@ public class WebSecurityConfig {
                             .requestMatchers("/api/events/**").permitAll()
                             .requestMatchers("/api/inscriptions/**").permitAll()
                             .requestMatchers("/api/group-events/**").permitAll()
+                            .requestMatchers("/api/admin/**").permitAll()
+                            .requestMatchers("/api/scores/**").permitAll()
                             .anyRequest().not().authenticated()
             );
     http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));

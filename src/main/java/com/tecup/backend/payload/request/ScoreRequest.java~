@@ -1,0 +1,4 @@
+package com.tecup.backend.payload.request;
+
+public class ScoreRequest {
+}
