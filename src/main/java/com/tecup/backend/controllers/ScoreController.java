@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -90,5 +91,95 @@ public class ScoreController {
                         ))
                         .toList()
         );
+    }
+
+    @GetMapping("/my-scores")
+    @PreAuthorize("hasRole('JURADO')")
+    public ResponseEntity<?> getMyScores() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Jury> juryOptional = juryRepository.findByJuradoUsername(username);
+
+        if (juryOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: No se encontró el jurado para el usuario actual."));
+        }
+
+        Jury jury = juryOptional.get();
+
+        List<ScoreResponse> scores = scoreRepository.findAll().stream()
+                .filter(score -> score.getJury().equals(jury))
+                .map(score -> new ScoreResponse(
+                        jury.getJurado().getUsername(),
+                        score.getGroupEvent().getName(),
+                        score.getScore(),
+                        score.getFechaPuntaje()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(scores);
+    }
+
+    /**
+     * Actualizar un puntaje hecho por el usuario logeado con el rol de JURADO.
+     */
+    @PutMapping("/update/{scoreId}")
+    @PreAuthorize("hasRole('JURADO')")
+    public ResponseEntity<?> updateScore(@PathVariable("scoreId") Long scoreId, @RequestBody ScoreRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Jury> juryOptional = juryRepository.findByJuradoUsername(username);
+
+        if (juryOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: No se encontró el jurado para el usuario actual."));
+        }
+
+        Jury jury = juryOptional.get();
+
+        Optional<Score> scoreOptional = scoreRepository.findById(scoreId);
+
+        if (scoreOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Puntaje no encontrado."));
+        }
+
+        Score score = scoreOptional.get();
+
+        if (!score.getJury().equals(jury)) {
+            return ResponseEntity.status(403).body(new MessageResponse("Error: No tienes permiso para actualizar este puntaje."));
+        }
+
+        score.setScore(request.getScore());
+        score.setFechaPuntaje(new Date()); // Actualizar fecha automáticamente
+        scoreRepository.save(score);
+
+        return ResponseEntity.ok(new MessageResponse("Puntaje actualizado exitosamente."));
+    }
+
+    /**
+     * Eliminar un puntaje hecho por el usuario logeado con el rol de JURADO.
+     */
+    @DeleteMapping("/delete/{scoreId}")
+    @PreAuthorize("hasRole('JURADO')")
+    public ResponseEntity<?> deleteScore(@PathVariable("scoreId") Long scoreId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Jury> juryOptional = juryRepository.findByJuradoUsername(username);
+
+        if (juryOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: No se encontró el jurado para el usuario actual."));
+        }
+
+        Jury jury = juryOptional.get();
+
+        Optional<Score> scoreOptional = scoreRepository.findById(scoreId);
+
+        if (scoreOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Puntaje no encontrado."));
+        }
+
+        Score score = scoreOptional.get();
+
+        if (!score.getJury().equals(jury)) {
+            return ResponseEntity.status(403).body(new MessageResponse("Error: No tienes permiso para eliminar este puntaje."));
+        }
+
+        scoreRepository.delete(score);
+        return ResponseEntity.ok(new MessageResponse("Puntaje eliminado exitosamente."));
     }
 }

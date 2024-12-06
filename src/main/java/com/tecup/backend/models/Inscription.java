@@ -14,7 +14,7 @@ public class Inscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
     private Date fecha_inscripcion;
 
     @ManyToOne

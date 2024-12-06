@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.security.Principal;
 
@@ -38,7 +39,7 @@ public class InscriptionController {
 
 
 
-
+    //este se eliminara
     @GetMapping("/all")
     @PreAuthorize("hasRole('USER') or hasRole('ORGANIZADOR') or hasRole('ADMIN') or hasRole('JURADO')")
     public List<InscriptionResponse> getAllInscriptions() {
@@ -52,10 +53,35 @@ public class InscriptionController {
                     inscription.getFecha_inscripcion().toString()
             );
         }).collect(Collectors.toList());
+    }   
+
+
+    //Para ver las incripciones las isncripciones que tiene el usuairo logeado (debe de tener el rol USER)
+    @GetMapping("/user-inscriptions")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getUserInscriptions() {
+        // Obtener el usuario autenticado
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<User> user = userRepository.findByUsername(username);
+
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: Usuario autenticado no encontrado.");
+        }
+
+        // Obtener las inscripciones del usuario autenticado
+        Set<Inscription> userInscriptions = user.get().getInscriptions();
+
+        // Mapear las inscripciones a InscriptionResponse
+        List<InscriptionResponse> inscriptionResponses = userInscriptions.stream()
+                .map(inscription -> new InscriptionResponse(
+                        inscription.getUser().getUsername(),
+                        inscription.getEvent().getName(),
+                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(inscription.getFecha_inscripcion())
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(inscriptionResponses);
     }
-    
-
-
 
 
 
@@ -115,6 +141,37 @@ public class InscriptionController {
         // Construir la respuesta
         return ResponseEntity.ok("Inscripción creada exitosamente.");
     }
+
+
+    //Elimina inscripción que selecione el usuario de las inscriociones que tiene
+    @DeleteMapping("/delete/{inscriptionId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> deleteUserInscription(@PathVariable("inscriptionId") long inscriptionId) {
+        // Obtener el usuario autenticado
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<User> user = userRepository.findByUsername(username);
+
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: Usuario autenticado no encontrado.");
+        }
+
+        // Verificar que la inscripción existe
+        Optional<Inscription> inscription = inscriptionRepository.findById(inscriptionId);
+        if (inscription.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: Inscripción no encontrada.");
+        }
+
+        // Validar que la inscripción pertenece al usuario autenticado
+        if (!inscription.get().getUser().getId().equals(user.get().getId())) {
+            return ResponseEntity.status(403).body("Error: No tienes permiso para eliminar esta inscripción.");
+        }
+
+        // Eliminar la inscripción
+        inscriptionRepository.delete(inscription.get());
+
+        return ResponseEntity.ok("La inscripción ha sido eliminada exitosamente.");
+    }
+
 
 
 

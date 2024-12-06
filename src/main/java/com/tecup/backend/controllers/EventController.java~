@@ -58,7 +58,6 @@ public class EventController {
         ).collect(Collectors.toList());
     }
 
-    // Crear un nuevo evento
     @PostMapping("/add")
     @PreAuthorize("hasRole('ORGANIZADOR')")
     public ResponseEntity<?> addEvent(@Valid @RequestBody EventRequest eventRequest) {
@@ -87,6 +86,7 @@ public class EventController {
         event.setPlace(eventRequest.getPlace());
         event.setStart_date(eventRequest.getStartDate());
         event.setEnd_date(eventRequest.getEndDate());
+        event.setMax_participants_group(eventRequest.getMax_participants_group()); // Campo requerido
         event.setStatusEvent(true); // Se establece como true por defecto
         event.setImg_event(eventRequest.getImgEvent());
         event.setOrganizador_id(user.get());
@@ -104,4 +104,33 @@ public class EventController {
 
         return ResponseEntity.ok(new MessageResponse("Evento creado exitosamente con " + groupEvents.size() + " grupos."));
     }
+
+    @DeleteMapping("/delete/{eventId}")
+    @PreAuthorize("hasRole('ORGANIZADOR')")
+    public ResponseEntity<?> deleteEvent(@PathVariable Long eventId) {
+        logger.info("Intentando eliminar el evento con ID: {}", eventId);
+
+        // Buscar el evento por su ID
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        if (eventOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Evento no encontrado."));
+        }
+
+        Event event = eventOptional.get();
+
+        // Eliminar grupos asociados al evento
+        List<GroupEvent> groupsToDelete = groupEventRepository.findByEvent(event);
+        if (!groupsToDelete.isEmpty()) {
+            groupEventRepository.deleteAll(groupsToDelete);
+            logger.info("Grupos asociados al evento eliminados.");
+        }
+
+        // Eliminar el evento
+        eventRepository.delete(event);
+        logger.info("Evento eliminado exitosamente.");
+
+        return ResponseEntity.ok(new MessageResponse("Evento y sus grupos asociados eliminados exitosamente."));
+    }
+
+
 }

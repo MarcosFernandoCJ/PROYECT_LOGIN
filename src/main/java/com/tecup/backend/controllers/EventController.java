@@ -105,4 +105,69 @@ public class EventController {
         return ResponseEntity.ok(new MessageResponse("Evento creado exitosamente con " + groupEvents.size() + " grupos."));
     }
 
+    @PutMapping("/update/{eventId}")
+    @PreAuthorize("hasRole('ORGANIZADOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> updateEvent(@PathVariable Long eventId, @Valid @RequestBody EventRequest eventRequest) {
+        // Buscar el evento por ID
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        if (eventOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Evento no encontrado."));
+        }
+
+        Event event = eventOptional.get();
+
+        // Validar fechas
+        if (eventRequest.getStartDate() == null || eventRequest.getEndDate() == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Las fechas de inicio y fin son obligatorias."));
+        }
+        if (eventRequest.getStartDate().after(eventRequest.getEndDate())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: La fecha de inicio no puede ser posterior a la fecha de fin."));
+        }
+
+        // Actualizar campos del evento
+        event.setName(eventRequest.getName());
+        event.setDescription(eventRequest.getDescription());
+        event.setPlace(eventRequest.getPlace());
+        event.setStart_date(eventRequest.getStartDate());
+        event.setEnd_date(eventRequest.getEndDate());
+        event.setMax_participants_group(eventRequest.getMax_participants_group());
+        event.setImg_event(eventRequest.getImgEvent());
+
+        // Guardar cambios en el repositorio
+        eventRepository.save(event);
+
+        return ResponseEntity.ok(new MessageResponse("Evento actualizado exitosamente."));
+    }
+
+
+
+
+    @DeleteMapping("/delete/{eventId}")
+    @PreAuthorize("hasRole('ORGANIZADOR')")
+    public ResponseEntity<?> deleteEvent(@PathVariable Long eventId) {
+        logger.info("Intentando eliminar el evento con ID: {}", eventId);
+
+        // Buscar el evento por su ID
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        if (eventOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Evento no encontrado."));
+        }
+
+        Event event = eventOptional.get();
+
+        // Eliminar grupos asociados al evento
+        List<GroupEvent> groupsToDelete = groupEventRepository.findByEvent(event);
+        if (!groupsToDelete.isEmpty()) {
+            groupEventRepository.deleteAll(groupsToDelete);
+            logger.info("Grupos asociados al evento eliminados.");
+        }
+
+        // Eliminar el evento
+        eventRepository.delete(event);
+        logger.info("Evento eliminado exitosamente.");
+
+        return ResponseEntity.ok(new MessageResponse("Evento y sus grupos asociados eliminados exitosamente."));
+    }
+
+
 }
