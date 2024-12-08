@@ -68,4 +68,3 @@ public class EventRequest {
         this.imgEvent = imgEvent;
     }
 }
-

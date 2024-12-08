@@ -7,14 +7,13 @@ import com.tecup.backend.payload.repository.RoleRepository;
 import com.tecup.backend.payload.repository.UserRepository;
 import com.tecup.backend.payload.request.AdminJuryRequest;
 import com.tecup.backend.payload.request.AdminRequest;
-import com.tecup.backend.payload.response.AdminJuryResponse;
-import com.tecup.backend.payload.response.AdminResponse;
-import com.tecup.backend.payload.response.MessageResponse;
+import com.tecup.backend.payload.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -187,4 +186,20 @@ public class AdminController {
 
         return ResponseEntity.ok(new AdminJuryResponse(user.getId(), user.getUsername(), null, null, "Rol de jurado eliminado exitosamente."));
     }
+
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers() {
+        List<BasicUserInfoResponse> users = userRepository.findAll().stream()
+                .map(user -> new BasicUserInfoResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getRoles().stream().map(role -> role.getName().name()).toList()
+                ))
+                .toList();
+        return ResponseEntity.ok(users);
+    }
+
+
+
 }

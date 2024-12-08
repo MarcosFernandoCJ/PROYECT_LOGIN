@@ -3,6 +3,7 @@ package com.tecup.backend.controllers;
 import com.tecup.backend.models.*;
 import com.tecup.backend.payload.repository.*;
 import com.tecup.backend.payload.request.ScoreRequest;
+import com.tecup.backend.payload.response.AdminJuryResponse;
 import com.tecup.backend.payload.response.MessageResponse;
 import com.tecup.backend.payload.response.ScoreResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/scores")
@@ -182,4 +184,30 @@ public class ScoreController {
         scoreRepository.delete(score);
         return ResponseEntity.ok(new MessageResponse("Puntaje eliminado exitosamente."));
     }
+
+    @GetMapping("/alljurados")
+    public ResponseEntity<List<AdminJuryResponse>> getAllJurors() {
+        List<Jury> juries = juryRepository.findAll();
+
+        // Mapear los jurados a AdminJuryResponse
+        List<AdminJuryResponse> response = juries.stream().map(jury -> {
+            // Si tienes el evento relacionado con el jurado, puedes usar el eventRepository para obtener su nombre.
+            // Asegúrate de que tu entidad Jury tenga una relación con Event
+            String eventName = jury.getEvent() != null ? jury.getEvent().getName() : "Evento no asignado";
+
+            return new AdminJuryResponse(
+                    jury.getJurado().getId(),
+                    jury.getJurado().getUsername(),
+                    jury.getEvent() != null ? jury.getEvent().getId() : null,
+                    eventName,
+                    "Mensaje o estado del jurado (opcional)"
+            );
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
 }
+

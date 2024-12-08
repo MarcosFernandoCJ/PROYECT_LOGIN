@@ -139,9 +139,6 @@ public class EventController {
         return ResponseEntity.ok(new MessageResponse("Evento actualizado exitosamente."));
     }
 
-
-
-
     @DeleteMapping("/delete/{eventId}")
     @PreAuthorize("hasRole('ORGANIZADOR')")
     public ResponseEntity<?> deleteEvent(@PathVariable Long eventId) {
@@ -169,5 +166,31 @@ public class EventController {
         return ResponseEntity.ok(new MessageResponse("Evento y sus grupos asociados eliminados exitosamente."));
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ORGANIZADOR') or hasRole('ADMIN') or hasRole('JURADO')")
+    public ResponseEntity<?> getEventById(@PathVariable Long id) {
+        logger.info("Buscando detalles del evento con ID: {}", id);
 
+        // Buscar el evento por su ID
+        Optional<Event> eventOptional = eventRepository.findById(id);
+
+        if (eventOptional.isEmpty()) {
+            logger.error("Evento con ID {} no encontrado.", id);
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Evento no encontrado."));
+        }
+
+        Event event = eventOptional.get();
+
+        // Crear la respuesta
+        EventResponse eventResponse = new EventResponse(
+                event.getId(),
+                event.getName(),
+                event.getDescription(),
+                event.getPlace(),
+                event.getImg_event(),
+                event.getOrganizador_id() != null ? event.getOrganizador_id().getUsername() : "No Organizador"
+        );
+
+        return ResponseEntity.ok(eventResponse);
+    }
 }

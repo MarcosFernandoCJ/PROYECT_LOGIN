@@ -1,19 +1,27 @@
 package com.tecup.backend.payload.response;
 
-
 public class InscriptionResponse {
+    private Long id; // ID de la inscripción
     private String username;
     private String eventName;
     private String fecha_Inscripcion;
 
     // Constructor
-    public InscriptionResponse(String username, String eventName, String fecha_Inscripcion) {
-
+    public InscriptionResponse(Long id, String username, String eventName, String fecha_Inscripcion) {
+        this.id = id;
         this.username = username;
         this.eventName = eventName;
         this.fecha_Inscripcion = fecha_Inscripcion;
     }
 
+    // Getters y Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
