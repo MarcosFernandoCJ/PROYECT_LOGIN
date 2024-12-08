@@ -1,8 +1,0 @@
-package com.tecup.backend.payload.response;
-
-public class GroupEventResponse {
-    private String nameGroupEvent;
-    private String nameEvent;
-    private String nameDepartment;
-    private 
-}

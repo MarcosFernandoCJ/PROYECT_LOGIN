@@ -48,6 +48,7 @@ public class InscriptionController {
         return inscriptionRepository.findAll().stream().map(inscription -> {
 
             return new InscriptionResponse(
+                    inscription.getId(), // Incluir el ID de la inscripción
                     inscription.getUser().getUsername(),
                     inscription.getEvent().getName(),
                     inscription.getFecha_inscripcion().toString()
@@ -74,6 +75,7 @@ public class InscriptionController {
         // Mapear las inscripciones a InscriptionResponse
         List<InscriptionResponse> inscriptionResponses = userInscriptions.stream()
                 .map(inscription -> new InscriptionResponse(
+                        inscription.getId(),
                         inscription.getUser().getUsername(),
                         inscription.getEvent().getName(),
                         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(inscription.getFecha_inscripcion())
